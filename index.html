@@ -460,131 +460,123 @@
   <div class="modal-content">
     <h2 id="cartTitle">سلة المشتريات / Shopping Cart</h2>
     <div id="cartItems">
-      <p>السلة فارغة</p>
+      <p>لا توجد منتجات في السلة</p>
     </div>
-    <div class="payment-instructions">
-      <h3>طريقة الدفع - Payment Instructions</h3>
-      <p>يرجى إرسال المبلغ إلى رقم حساب الراجحي التالي مع ذكر اسم المنتج ورقم الواتساب للطلب:</p>
-      <p><code>077020010006082711749</code></p>
-      <p>السعر: <strong>12.99 ر.س</strong></p>
-      <p>Please send the amount to the following Al Rajhi bank account number and include the product name and WhatsApp number for the order:</p>
-      <p><code>077020010006082711749</code></p>
-      <p>Price: <strong>12.99 SAR</strong></p>
-      <p>بعد الدفع، يرجى إرسال إيصال الدفع على رقم الواتساب التالي لاستكمال الطلب:</p>
-      <p><a href="https://wa.me/966554369884" target="_blank" rel="noopener">+966 55 436 9884 (WhatsApp)</a></p>
-      <p>After payment, please send the payment receipt via WhatsApp to the following number to complete the order:</p>
-      <p><a href="https://wa.me/966554369884" target="_blank" rel="noopener">+966 55 436 9884 (WhatsApp)</a></p>
+    <div class="payment-instructions" aria-live="polite" role="alert">
+      <strong>تعليمات الدفع / Payment Instructions:</strong><br />
+      يرجى تحويل المبلغ إلى حساب بنك الراجحي التالي:<br />
+      <code>رقم الحساب: 077020010006082711749</code><br />
+      بعد التحويل، يرجى إرسال إيصال الدفع عبر واتساب إلى:<br />
+      <a href="https://wa.me/554369884" target="_blank" rel="noopener">+554369884</a><br />
+      بمجرد التأكيد، سيتم إرسال الملخص الإلكتروني إليك فوراً.<br /><br />
+      Please transfer the payment to the following Al Rajhi Bank account:<br />
+      <code>Account Number: 077020010006082711749</code><br />
+      After the transfer, please send the payment receipt via WhatsApp to:<br />
+      <a href="https://wa.me/554369884" target="_blank" rel="noopener">+554369884</a><br />
+      Once confirmed, the eBook will be sent to you promptly.
     </div>
     <button id="closeCartBtn">إغلاق / Close</button>
   </div>
 </div>
 
 <script>
-  // وظائف المودالات
+  // عرض وإخفاء مودال تسجيل الدخول
   const loginBtn = document.getElementById('loginBtn');
   const signupBtn = document.getElementById('signupBtn');
   const cartBtn = document.getElementById('cartBtn');
-  const mobileAuthBtn = document.getElementById('mobileAuthBtn');
-
   const loginModal = document.getElementById('loginModal');
   const signupModal = document.getElementById('signupModal');
   const cartModal = document.getElementById('cartModal');
+  const closeCartBtn = document.getElementById('closeCartBtn');
+  const forgotPasswordLink = document.getElementById('forgotPasswordLink');
   const forgotPasswordModal = document.getElementById('forgotPasswordModal');
+  const showSignupFromLogin = document.getElementById('showSignupFromLogin');
+  const showLoginFromSignup = document.getElementById('showLoginFromSignup');
+  const mobileAuthBtn = document.getElementById('mobileAuthBtn');
 
-  loginBtn.addEventListener('click', e => {
-    e.preventDefault();
+  loginBtn.addEventListener('click', () => {
     loginModal.classList.add('active');
   });
-  signupBtn.addEventListener('click', e => {
-    e.preventDefault();
+  signupBtn.addEventListener('click', () => {
     signupModal.classList.add('active');
   });
-  cartBtn.addEventListener('click', e => {
-    e.preventDefault();
+  cartBtn.addEventListener('click', () => {
     cartModal.classList.add('active');
   });
-  mobileAuthBtn.addEventListener('click', e => {
-    e.preventDefault();
-    loginModal.classList.add('active');
-  });
-
-  // إغلاق مودال السلة
-  document.getElementById('closeCartBtn').addEventListener('click', () => {
+  closeCartBtn.addEventListener('click', () => {
     cartModal.classList.remove('active');
   });
 
-  // إغلاق مودال تسجيل الدخول عند الضغط خارج المحتوى
-  loginModal.addEventListener('click', e => {
-    if (e.target === loginModal) {
-      loginModal.classList.remove('active');
-    }
-  });
-
-  // إغلاق مودال إنشاء حساب عند الضغط خارج المحتوى
-  signupModal.addEventListener('click', e => {
-    if (e.target === signupModal) {
-      signupModal.classList.remove('active');
-    }
-  });
-
-  // إغلاق مودال نسيت كلمة السر عند الضغط خارج المحتوى
-  forgotPasswordModal.addEventListener('click', e => {
-    if (e.target === forgotPasswordModal) {
-      forgotPasswordModal.classList.remove('active');
-    }
-  });
-
-  // إغلاق مودال السلة عند الضغط خارج المحتوى
-  cartModal.addEventListener('click', e => {
-    if (e.target === cartModal) {
-      cartModal.classList.remove('active');
-    }
-  });
-
-  // روابط التبديل بين تسجيل الدخول وإنشاء حساب
-  document.getElementById('showSignupFromLogin').addEventListener('click', e => {
-    e.preventDefault();
-    loginModal.classList.remove('active');
-    signupModal.classList.add('active');
-  });
-  document.getElementById('showLoginFromSignup').addEventListener('click', e => {
-    e.preventDefault();
-    signupModal.classList.remove('active');
-    loginModal.classList.add('active');
-  });
-
-  // رابط نسيت كلمة السر
-  document.getElementById('forgotPasswordLink').addEventListener('click', e => {
+  forgotPasswordLink.addEventListener('click', (e) => {
     e.preventDefault();
     loginModal.classList.remove('active');
     forgotPasswordModal.classList.add('active');
   });
 
-  // مثال إضافة منتج للسلة (تعديل بسيط للزر)
-  const buyBtn = document.querySelector('.btn-buy');
-  const cartItemsDiv = document.getElementById('cartItems');
-  let cartCount = 0;
+  showSignupFromLogin.addEventListener('click', (e) => {
+    e.preventDefault();
+    loginModal.classList.remove('active');
+    signupModal.classList.add('active');
+  });
 
-  buyBtn.addEventListener('click', () => {
+  showLoginFromSignup.addEventListener('click', (e) => {
+    e.preventDefault();
+    signupModal.classList.remove('active');
+    loginModal.classList.add('active');
+  });
+
+  mobileAuthBtn.addEventListener('click', () => {
+    if(loginModal.classList.contains('active')) {
+      loginModal.classList.remove('active');
+      signupModal.classList.add('active');
+    } else if(signupModal.classList.contains('active')) {
+      signupModal.classList.remove('active');
+      loginModal.classList.add('active');
+    } else {
+      loginModal.classList.add('active');
+    }
+  });
+
+  // مثال بسيط لعدد المنتجات في السلة
+  let cartCount = 0;
+  cartBtn.textContent = `سلة المشتريات (${cartCount})`;
+
+  // إضافة حدث الزر "أضف إلى السلة"
+  const btnBuy = document.querySelector('.btn-buy');
+  const cartItems = document.getElementById('cartItems');
+
+  btnBuy.addEventListener('click', () => {
     cartCount++;
     cartBtn.textContent = `سلة المشتريات (${cartCount})`;
-    cartItemsDiv.innerHTML = `
-      <div class="cart-item">
-        <span>ملخص كتاب العادات الذرية</span>
-        <span>12.99 ر.س</span>
-        <button onclick="removeItem(this)">✕</button>
+    cartItems.innerHTML = `
+      <div class="cart-item" tabindex="0">
+        ملخص كتاب العادات الذرية -12.99 ريال سعودي
+        <button aria-label="حذف من السلة">×</button>
       </div>
     `;
   });
 
-  function removeItem(button) {
-    button.parentElement.remove();
-    cartCount--;
-    cartBtn.textContent = `سلة المشتريات (${cartCount})`;
-    if (cartCount === 0) {
-      cartItemsDiv.innerHTML = '<p>السلة فارغة</p>';
+  // حذف عنصر من السلة
+  cartItems.addEventListener('click', (e) => {
+    if (e.target.tagName === 'BUTTON') {
+      cartCount = 0;
+      cartBtn.textContent = `سلة المشتريات (${cartCount})`;
+      cartItems.innerHTML = '<p>لا توجد منتجات في السلة</p>';
     }
-  }
+  });
+
+  // تأثير الظهور على التمرير
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.3 });
+
+  document.querySelectorAll('.product-featured, section.categories').forEach(el => {
+    observer.observe(el);
+  });
 </script>
 
 </body>
