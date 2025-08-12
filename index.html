@@ -320,6 +320,23 @@
     padding: 0 8px;
     font-weight: bold;
   }
+  /* تعليمات الدفع */
+  .payment-instructions {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: #f9f9f9;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    color: var(--brown-dark);
+  }
+  .payment-instructions code {
+    font-weight: bold;
+  }
+  .payment-instructions a {
+    color: var(--brown-dark);
+    font-weight: bold;
+  }
 </style>
 </head>
 <body>
@@ -381,7 +398,7 @@
 
   <section id="contact" style="margin-top:3rem; background: var(--white); padding:1.5rem; border-radius:8px;">
     <h3>تواصل معنا<br>Contact</h3>
-    <p>لأي استفسار أو دعم، تواصل معنا عبر واتساب: <a href="https://wa.me/554369884" target="_blank" rel="noopener">554369884</a></p>
+    <p>لأي استفسار أو دعم، تواصل معنا عبر واتساب: <a href="https://wa.me/554369884" target="_blank" rel="noopener">+554369884</a></p>
   </section>
 </main>
 
@@ -435,248 +452,155 @@
       <input type="email" id="forgotEmail" name="forgotEmail" required />
       <button type="submit">إرسال رمز التحقق</button>
     </form>
-    <p id="forgotPasswordMessage" style="margin-top:1rem; color:green; display:none; text-align:center;"></p>
   </div>
 </div>
 
-<!-- مودال السلة -->
+<!-- مودال سلة المشتريات -->
 <div id="cartModal" role="dialog" aria-modal="true" aria-labelledby="cartTitle">
-  <div class="modal-content">
+  <div class="modal-content" style="max-width:400px;">
     <h2 id="cartTitle">سلة المشتريات / Shopping Cart</h2>
-    <div id="cartItems">السلة فارغة</div>
-    <button id="closeCartBtn">إغلاق</button>
+    <div id="cartItems"></div>
+    <div class="payment-instructions" aria-live="polite" role="alert" style="margin-top:1rem;">
+      <strong>Payment Instructions:</strong><br />
+      Please transfer the payment to the following Al Rajhi Bank account:<br />
+      <code>Account Number: 077020010006082711749</code><br />
+      After the transfer, please send the payment receipt via WhatsApp to:<br />
+      <a href="https://wa.me/554369884" target="_blank" rel="noopener">+554369884</a><br />
+      Once confirmed, the eBook will be sent to you promptly.
+    </div>
+    <button id="closeCartBtn">إغلاق / Close</button>
   </div>
 </div>
 
 <script>
-  // بيانات المستخدمين والسلة والمستخدم الحالي (تخزين مؤقت في الذاكرة فقط)
-  const users = [];
-  let currentUser = null;
-  const cart = [];
+  // المنتج المعروض
+  const product = {
+    id: 'atomic-habits-ebook',
+    name: 'ملخص كتاب العادات الذرية',
+    price: 12.99
+  };
 
-  // عناصر الصفحة
-  const loginBtn = document.getElementById('loginBtn');
-  const signupBtn = document.getElementById('signupBtn');
+  // عناصر DOM
   const cartBtn = document.getElementById('cartBtn');
+  const cartModal = document.getElementById('cartModal');
+  const closeCartBtn = document.getElementById('closeCartBtn');
+  const cartItemsContainer = document.getElementById('cartItems');
+  const btnBuy = document.querySelector('.btn-buy');
+
+  let cart = [];
+
+  // تحديث عدد العناصر في السلة في الزر
+  function updateCartCount() {
+    const count = cart.length;
+    cartBtn.textContent = `سلة المشتريات (${count})`;
+  }
+
+  // تحديث عرض محتويات السلة
+  function renderCartItems() {
+    cartItemsContainer.innerHTML = '';
+    if(cart.length === 0) {
+      cartItemsContainer.textContent = 'سلة المشتريات فارغة';
+      return;
+    }
+    cart.forEach((item, index) => {
+      const div = document.createElement('div');
+      div.className = 'cart-item';
+      div.innerHTML = `
+        <span>${item.name} - ${item.price.toFixed(2)} ريال</span>
+        <button aria-label="حذف ${item.name} من السلة" data-index="${index}">×</button>
+      `;
+      cartItemsContainer.appendChild(div);
+    });
+  }
+
+  // إضافة المنتج للسلة
+  btnBuy.addEventListener('click', () => {
+    // منع التكرار بنفس المنتج
+    if(cart.find(item => item.id === product.id)) {
+      alert('المنتج موجود بالفعل في السلة.');
+      return;
+    }
+    cart.push(product);
+    updateCartCount();
+    renderCartItems();
+  });
+
+  // حذف عنصر من السلة
+  cartItemsContainer.addEventListener('click', (e) => {
+    if(e.target.tagName === 'BUTTON') {
+      const index = parseInt(e.target.getAttribute('data-index'));
+      if(!isNaN(index)) {
+        cart.splice(index, 1);
+        updateCartCount();
+        renderCartItems();
+      }
+    }
+  });
+
+  // فتح وإغلاق مودال السلة
+  cartBtn.addEventListener('click', () => {
+    renderCartItems();
+    cartModal.classList.add('active');
+  });
+  closeCartBtn.addEventListener('click', () => {
+    cartModal.classList.remove('active');
+  });
+
+  // مودالات تسجيل الدخول وإنشاء الحساب وغيرها (كود مختصر هنا لأجل المثال)
   const loginModal = document.getElementById('loginModal');
   const signupModal = document.getElementById('signupModal');
-  const cartModal = document.getElementById('cartModal');
   const forgotPasswordModal = document.getElementById('forgotPasswordModal');
+  const loginBtn = document.getElementById('loginBtn');
+  const signupBtn = document.getElementById('signupBtn');
+  const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+  const showSignupFromLogin = document.getElementById('showSignupFromLogin');
+  const showLoginFromSignup = document.getElementById('showLoginFromSignup');
 
-  const loginForm = document.getElementById('loginForm');
-  const signupForm = document.getElementById('signupForm');
-  const forgotPasswordForm = document.getElementById('forgotPasswordForm');
-
-  const cartItems = document.getElementById('cartItems');
-  const closeCartBtn = document.getElementById('closeCartBtn');
-  const mobileAuthBtn = document.getElementById('mobileAuthBtn');
-
-  // فتح مودال تسجيل الدخول
   loginBtn.addEventListener('click', e => {
     e.preventDefault();
     loginModal.classList.add('active');
-    signupModal.classList.remove('active');
-    cartModal.classList.remove('active');
-    forgotPasswordModal.classList.remove('active');
   });
-
-  // فتح مودال إنشاء حساب
   signupBtn.addEventListener('click', e => {
     e.preventDefault();
     signupModal.classList.add('active');
-    loginModal.classList.remove('active');
-    cartModal.classList.remove('active');
-    forgotPasswordModal.classList.remove('active');
   });
-
-  // فتح مودال تسجيل دخول / إنشاء حساب في الجوال
-  mobileAuthBtn.addEventListener('click', e => {
+  forgotPasswordLink.addEventListener('click', e => {
     e.preventDefault();
-    loginModal.classList.add('active');
-    signupModal.classList.remove('active');
-    cartModal.classList.remove('active');
-    forgotPasswordModal.classList.remove('active');
+    loginModal.classList.remove('active');
+    forgotPasswordModal.classList.add('active');
   });
-
-  // الروابط داخل المودال للتبديل بين تسجيل الدخول وإنشاء حساب
-  document.getElementById('showSignupFromLogin').addEventListener('click', e => {
+  showSignupFromLogin.addEventListener('click', e => {
     e.preventDefault();
     loginModal.classList.remove('active');
     signupModal.classList.add('active');
-    forgotPasswordModal.classList.remove('active');
   });
-  document.getElementById('showLoginFromSignup').addEventListener('click', e => {
+  showLoginFromSignup.addEventListener('click', e => {
     e.preventDefault();
     signupModal.classList.remove('active');
     loginModal.classList.add('active');
-    forgotPasswordModal.classList.remove('active');
   });
-
-  // فتح مودال نسيت كلمة السر
-  document.getElementById('forgotPasswordLink').addEventListener('click', e => {
-    e.preventDefault();
-    loginModal.classList.remove('active');
-    signupModal.classList.remove('active');
-    cartModal.classList.remove('active');
-    forgotPasswordModal.classList.add('active');
-    document.getElementById('forgotPasswordMessage').style.display = 'none';
-    forgotPasswordForm.reset();
-  });
-
-  // إغلاق المودال عند النقر خارج المحتوى
-  [loginModal, signupModal, cartModal, forgotPasswordModal].forEach(modal => {
+  // إغلاق المودالات عند الضغط خارجها
+  [loginModal, signupModal, forgotPasswordModal, cartModal].forEach(modal => {
     modal.addEventListener('click', e => {
-      if (e.target === modal) {
+      if(e.target === modal) {
         modal.classList.remove('active');
       }
     });
   });
 
-  // التعامل مع إنشاء حساب
-  signupForm.addEventListener('submit', e => {
-    e.preventDefault();
-    const email = signupForm.signupEmail.value.trim().toLowerCase();
-    const password = signupForm.signupPassword.value;
-    const confirmPassword = signupForm.confirmPassword.value;
-    if (users.find(u => u.email === email)) {
-      alert('هذا البريد مسجل مسبقاً');
-      return;
-    }
-    if (password !== confirmPassword) {
-      alert('كلمة المرور وتأكيد كلمة المرور غير متطابقين');
-      return;
-    }
-    if (password.length < 6) {
-      alert('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
-      return;
-    }
-    // نضيف المستخدم الجديد
-    users.push({email, password});
-    alert('تم إنشاء الحساب بنجاح، يمكنك الآن تسجيل الدخول');
-    signupForm.reset();
-    signupModal.classList.remove('active');
-    loginModal.classList.add('active');
-  });
-
-  // التعامل مع تسجيل دخول
-  loginForm.addEventListener('submit', e => {
-    e.preventDefault();
-    const email = loginForm.email.value.trim().toLowerCase();
-    const password = loginForm.password.value;
-    const user = users.find(u => u.email === email && u.password === password);
-    if (!user) {
-      alert('البريد أو كلمة المرور غير صحيحة');
-      return;
-    }
-    currentUser = user;
-    alert('تم تسجيل الدخول بنجاح، مرحباً بك ' + email);
-    loginForm.reset();
-    loginModal.classList.remove('active');
-    updateUIAfterLogin();
-  });
-
-  // التعامل مع نسيت كلمة السر - إرسال رمز (محاكاة)
-  forgotPasswordForm.addEventListener('submit', e => {
-    e.preventDefault();
-    const email = forgotPasswordForm.forgotEmail.value.trim().toLowerCase();
-    const userExists = users.some(u => u.email === email);
-    if (!userExists) {
-      alert('هذا البريد غير مسجل');
-      return;
-    }
-    // هنا محاكاة إرسال رمز - في الحقيقة تحتاج سيرفر وبريد حقيقي
-    const messageEl = document.getElementById('forgotPasswordMessage');
-    messageEl.textContent = `تم إرسال رمز التحقق إلى البريد ${email} (محاكاة)`;
-    messageEl.style.display = 'block';
-    forgotPasswordForm.reset();
-  });
-
-  // تحديث واجهة المستخدم بعد تسجيل الدخول (مثلاً تعطيل زر التسجيل والدخول)
-  function updateUIAfterLogin() {
-    loginBtn.style.display = 'none';
-    signupBtn.style.display = 'none';
-    mobileAuthBtn.style.display = 'none';
-
-    // عرض البريد في القائمة (يمكن تعديله لعرض اسم بدلاً من البريد)
-    const userNameLi = document.createElement('li');
-    userNameLi.textContent = currentUser.email;
-    userNameLi.style.color = 'var(--beige)';
-    userNameLi.style.fontWeight = 'bold';
-    loginBtn.parentElement.appendChild(userNameLi);
-  }
-
-  // زر إضافة للمنتج إلى السلة
-  const addToCartBtn = document.querySelector('.btn-buy');
-  addToCartBtn.addEventListener('click', () => {
-    if (!currentUser) {
-      alert('الرجاء تسجيل الدخول أولاً لإضافة منتجات إلى السلة');
-      loginModal.classList.add('active');
-      return;
-    }
-    const product = {
-      id: 'atomic-habits-ebook',
-      name: 'ملخص كتاب العادات الذرية',
-      price: 10.0 // سعر افتراضي
-    };
-    cart.push(product);
-    alert('تم إضافة المنتج إلى السلة');
-    updateCartCount();
-  });
-
-  // تحديث عدد المنتجات في زر السلة
-  function updateCartCount() {
-    cartBtn.textContent = `سلة المشتريات (${cart.length})`;
-  }
-
-  // فتح مودال السلة وعرض المحتويات
-  cartBtn.addEventListener('click', e => {
-    e.preventDefault();
-    if (!currentUser) {
-      alert('الرجاء تسجيل الدخول لعرض السلة');
-      loginModal.classList.add('active');
-      return;
-    }
-    renderCartItems();
-    cartModal.classList.add('active');
-  });
-
-  // إغلاق مودال السلة
-  closeCartBtn.addEventListener('click', () => {
-    cartModal.classList.remove('active');
-  });
-
-  // عرض محتويات السلة مع إمكانية الحذف
-  function renderCartItems() {
-    if (cart.length === 0) {
-      cartItems.textContent = 'السلة فارغة';
-      return;
-    }
-    cartItems.innerHTML = '';
-    cart.forEach((item, index) => {
-      const div = document.createElement('div');
-      div.className = 'cart-item';
-      div.innerHTML = `
-        <span>${item.name} - السعر: $${item.price.toFixed(2)}</span>
-        <button aria-label="حذف ${item.name}" data-index="${index}">×</button>
-      `;
-      cartItems.appendChild(div);
-    });
-    // إضافة حدث حذف
-    cartItems.querySelectorAll('button').forEach(btn => {
-      btn.addEventListener('click', e => {
-        const i = +e.target.dataset.index;
-        cart.splice(i,1);
-        updateCartCount();
-        renderCartItems();
-      });
+  // تأثير الظهور عند التمرير للأقسام
+  function revealOnScroll() {
+    const elements = document.querySelectorAll('.product-featured, section.categories');
+    const windowHeight = window.innerHeight;
+    elements.forEach(el => {
+      const elementTop = el.getBoundingClientRect().top;
+      if(elementTop < windowHeight - 100) {
+        el.classList.add('visible');
+      }
     });
   }
-
-  // إضافة بعض التأثيرات عند تحميل الصفحة (لظهور المنتج والفئات)
-  window.addEventListener('load', () => {
-    document.querySelector('.product-featured').classList.add('visible');
-    document.querySelector('.categories').classList.add('visible');
-  });
+  window.addEventListener('scroll', revealOnScroll);
+  window.addEventListener('load', revealOnScroll);
 </script>
 
 </body>
