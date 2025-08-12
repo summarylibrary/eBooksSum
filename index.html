@@ -457,11 +457,18 @@
 
 <!-- مودال سلة المشتريات -->
 <div id="cartModal" role="dialog" aria-modal="true" aria-labelledby="cartTitle">
-  <div class="modal-content" style="max-width:400px;">
+  <div class="modal-content">
     <h2 id="cartTitle">سلة المشتريات / Shopping Cart</h2>
-    <div id="cartItems"></div>
-    <div class="payment-instructions" aria-live="polite" role="alert" style="margin-top:1rem;">
-      <strong>Payment Instructions:</strong><br />
+    <div id="cartItems">
+      <p>لا توجد منتجات في السلة</p>
+    </div>
+    <div class="payment-instructions" aria-live="polite" role="alert">
+      <strong>تعليمات الدفع / Payment Instructions:</strong><br />
+      يرجى تحويل المبلغ إلى حساب بنك الراجحي التالي:<br />
+      <code>رقم الحساب: 077020010006082711749</code><br />
+      بعد التحويل، يرجى إرسال إيصال الدفع عبر واتساب إلى:<br />
+      <a href="https://wa.me/554369884" target="_blank" rel="noopener">+554369884</a><br />
+      بمجرد التأكيد، سيتم إرسال الملخص الإلكتروني إليك فوراً.<br /><br />
       Please transfer the payment to the following Al Rajhi Bank account:<br />
       <code>Account Number: 077020010006082711749</code><br />
       After the transfer, please send the payment receipt via WhatsApp to:<br />
@@ -473,134 +480,103 @@
 </div>
 
 <script>
-  // المنتج المعروض
-  const product = {
-    id: 'atomic-habits-ebook',
-    name: 'ملخص كتاب العادات الذرية',
-    price: 12.99
-  };
-
-  // عناصر DOM
+  // عرض وإخفاء مودال تسجيل الدخول
+  const loginBtn = document.getElementById('loginBtn');
+  const signupBtn = document.getElementById('signupBtn');
   const cartBtn = document.getElementById('cartBtn');
+  const loginModal = document.getElementById('loginModal');
+  const signupModal = document.getElementById('signupModal');
   const cartModal = document.getElementById('cartModal');
   const closeCartBtn = document.getElementById('closeCartBtn');
-  const cartItemsContainer = document.getElementById('cartItems');
-  const btnBuy = document.querySelector('.btn-buy');
+  const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+  const forgotPasswordModal = document.getElementById('forgotPasswordModal');
+  const showSignupFromLogin = document.getElementById('showSignupFromLogin');
+  const showLoginFromSignup = document.getElementById('showLoginFromSignup');
+  const mobileAuthBtn = document.getElementById('mobileAuthBtn');
 
-  let cart = [];
-
-  // تحديث عدد العناصر في السلة في الزر
-  function updateCartCount() {
-    const count = cart.length;
-    cartBtn.textContent = `سلة المشتريات (${count})`;
-  }
-
-  // تحديث عرض محتويات السلة
-  function renderCartItems() {
-    cartItemsContainer.innerHTML = '';
-    if(cart.length === 0) {
-      cartItemsContainer.textContent = 'سلة المشتريات فارغة';
-      return;
-    }
-    cart.forEach((item, index) => {
-      const div = document.createElement('div');
-      div.className = 'cart-item';
-      div.innerHTML = `
-        <span>${item.name} - ${item.price.toFixed(2)} ريال</span>
-        <button aria-label="حذف ${item.name} من السلة" data-index="${index}">×</button>
-      `;
-      cartItemsContainer.appendChild(div);
-    });
-  }
-
-  // إضافة المنتج للسلة
-  btnBuy.addEventListener('click', () => {
-    // منع التكرار بنفس المنتج
-    if(cart.find(item => item.id === product.id)) {
-      alert('المنتج موجود بالفعل في السلة.');
-      return;
-    }
-    cart.push(product);
-    updateCartCount();
-    renderCartItems();
+  loginBtn.addEventListener('click', () => {
+    loginModal.classList.add('active');
   });
-
-  // حذف عنصر من السلة
-  cartItemsContainer.addEventListener('click', (e) => {
-    if(e.target.tagName === 'BUTTON') {
-      const index = parseInt(e.target.getAttribute('data-index'));
-      if(!isNaN(index)) {
-        cart.splice(index, 1);
-        updateCartCount();
-        renderCartItems();
-      }
-    }
+  signupBtn.addEventListener('click', () => {
+    signupModal.classList.add('active');
   });
-
-  // فتح وإغلاق مودال السلة
   cartBtn.addEventListener('click', () => {
-    renderCartItems();
     cartModal.classList.add('active');
   });
   closeCartBtn.addEventListener('click', () => {
     cartModal.classList.remove('active');
   });
 
-  // مودالات تسجيل الدخول وإنشاء الحساب وغيرها (كود مختصر هنا لأجل المثال)
-  const loginModal = document.getElementById('loginModal');
-  const signupModal = document.getElementById('signupModal');
-  const forgotPasswordModal = document.getElementById('forgotPasswordModal');
-  const loginBtn = document.getElementById('loginBtn');
-  const signupBtn = document.getElementById('signupBtn');
-  const forgotPasswordLink = document.getElementById('forgotPasswordLink');
-  const showSignupFromLogin = document.getElementById('showSignupFromLogin');
-  const showLoginFromSignup = document.getElementById('showLoginFromSignup');
-
-  loginBtn.addEventListener('click', e => {
-    e.preventDefault();
-    loginModal.classList.add('active');
-  });
-  signupBtn.addEventListener('click', e => {
-    e.preventDefault();
-    signupModal.classList.add('active');
-  });
-  forgotPasswordLink.addEventListener('click', e => {
+  forgotPasswordLink.addEventListener('click', (e) => {
     e.preventDefault();
     loginModal.classList.remove('active');
     forgotPasswordModal.classList.add('active');
   });
-  showSignupFromLogin.addEventListener('click', e => {
+
+  showSignupFromLogin.addEventListener('click', (e) => {
     e.preventDefault();
     loginModal.classList.remove('active');
     signupModal.classList.add('active');
   });
-  showLoginFromSignup.addEventListener('click', e => {
+
+  showLoginFromSignup.addEventListener('click', (e) => {
     e.preventDefault();
     signupModal.classList.remove('active');
     loginModal.classList.add('active');
   });
-  // إغلاق المودالات عند الضغط خارجها
-  [loginModal, signupModal, forgotPasswordModal, cartModal].forEach(modal => {
-    modal.addEventListener('click', e => {
-      if(e.target === modal) {
-        modal.classList.remove('active');
-      }
-    });
+
+  mobileAuthBtn.addEventListener('click', () => {
+    if(loginModal.classList.contains('active')) {
+      loginModal.classList.remove('active');
+      signupModal.classList.add('active');
+    } else if(signupModal.classList.contains('active')) {
+      signupModal.classList.remove('active');
+      loginModal.classList.add('active');
+    } else {
+      loginModal.classList.add('active');
+    }
   });
 
-  // تأثير الظهور عند التمرير للأقسام
-  function revealOnScroll() {
-    const elements = document.querySelectorAll('.product-featured, section.categories');
-    const windowHeight = window.innerHeight;
-    elements.forEach(el => {
-      const elementTop = el.getBoundingClientRect().top;
-      if(elementTop < windowHeight - 100) {
-        el.classList.add('visible');
+  // مثال بسيط لعدد المنتجات في السلة
+  let cartCount = 0;
+  cartBtn.textContent = `سلة المشتريات (${cartCount})`;
+
+  // إضافة حدث الزر "أضف إلى السلة"
+  const btnBuy = document.querySelector('.btn-buy');
+  const cartItems = document.getElementById('cartItems');
+
+  btnBuy.addEventListener('click', () => {
+    cartCount++;
+    cartBtn.textContent = `سلة المشتريات (${cartCount})`;
+    cartItems.innerHTML = `
+      <div class="cart-item" tabindex="0">
+        ملخص كتاب العادات الذرية - $12.99 ريال سعودي
+        <button aria-label="حذف من السلة">×</button>
+      </div>
+    `;
+  });
+
+  // حذف عنصر من السلة
+  cartItems.addEventListener('click', (e) => {
+    if (e.target.tagName === 'BUTTON') {
+      cartCount = 0;
+      cartBtn.textContent = `سلة المشتريات (${cartCount})`;
+      cartItems.innerHTML = '<p>لا توجد منتجات في السلة</p>';
+    }
+  });
+
+  // تأثير الظهور على التمرير
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
       }
     });
-  }
-  window.addEventListener('scroll', revealOnScroll);
-  window.addEventListener('load', revealOnScroll);
+  }, { threshold: 0.3 });
+
+  document.querySelectorAll('.product-featured, section.categories').forEach(el => {
+    observer.observe(el);
+  });
 </script>
 
 </body>
