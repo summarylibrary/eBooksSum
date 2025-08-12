@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Summary Library - ملخصات الكتب</title>
+<style>
+  :root {
+    --brown-dark: #5D4037;
+    --brown-light: #A1887F;
+    --beige: #F5F5DC;
+    --white: #FFFFFF;
+    --black: #000000;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    margin: 0; padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--beige);
+    color: var(--brown-dark);
+    transition: background-color 0.3s ease, color 0.3s ease;
+    overflow-x: hidden; /* منع التمرير الأفقي */
+  }
+  a {
+    color: var(--brown-dark);
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+  a:hover {
+    color: var(--brown-light);
+  }
+  nav {
+    background-color: var(--brown-dark);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+  }
+  nav .logo {
+    color: var(--white);
+    font-weight: bold;
+    font-size: 1.4rem;
+    cursor: default;
+    padding: 0.8rem 0;
+    user-select: none;
+  }
+  nav ul {
+    list-style: none;
+    display: flex;
+    gap: 1.5rem;
+    margin: 0; padding: 0;
+  }
+  nav ul li {
+    position: relative;
+  }
+  nav ul li a {
+    color: var(--white);
+    font-weight: 600;
+    padding: 1rem 0;
+    display: inline-block;
+    position: relative;
+  }
+  nav ul li a:hover {
+    color: var(--beige);
+  }
+  nav ul li a::after {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 2px;
+    background: var(--beige);
+    left: 50%;
+    bottom: 0;
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+  }
+  nav ul li a:hover::after {
+    width: 50%;
+  }
+  main {
+    max-width: 1000px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
+  section {
+    scroll-margin-top: 70px;
+  }
+  .product-featured {
+    display: flex;
+    gap: 2rem;
+    background: var(--white);
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+    align-items: center;
+    flex-wrap: wrap;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .product-featured.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .product-image {
+    flex: 1 1 300px;
+    max-width: 300px;
+  }
+  .product-image img {
+    width: 100%;
+    border-radius: 8px;
+    object-fit: cover;
+  }
+  .product-info {
+    flex: 2 1 400px;
+    background: var(--beige);
+    border-radius: 8px;
+    padding: 1rem;
+    color: var(--black);
+    position: relative;
+  }
+  .product-info h2 {
+    margin-top: 0;
+  }
+  .coming-soon {
+    margin-top: 0.5rem;
+    color: var(--brown-light);
+    font-weight: bold;
+    font-size: 1.2rem;
+  }
+  .stars {
+    margin: 0.8rem 0;
+  }
+  .stars span {
+    color: gold;
+    font-size: 1.5rem;
+  }
+  .btn-buy {
+    background-color: var(--brown-dark);
+    color: var(--white);
+    border: none;
+    padding: 0.7rem 1.2rem;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: not-allowed;
+    opacity: 0.6;
+    user-select: none;
+    transition: background-color 0.3s ease;
+  }
+  .btn-buy.enabled {
+    cursor: pointer;
+    opacity: 1;
+  }
+  .btn-buy.enabled:hover {
+    background-color: var(--brown-light);
+  }
+  section.categories {
+    margin-top: 3rem;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+    background-color: var(--brown-dark);
+    color: var(--beige);
+    padding: 1rem;
+    border-radius: 8px;
+  }
+  section.categories.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  section.categories h3 {
+    border-bottom: 2px solid var(--beige);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+    color: var(--beige);
+  }
+  .categories-list {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .category-card {
+    background: var(--white);
+    border-radius: 8px;
+    padding: 1rem;
+    flex: 1 1 250px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    text-align: center;
+    font-weight: 600;
+    color: var(--brown-dark);
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
+  }
+  .category-card:hover {
+    background-color: var(--brown-dark);
+    color: var(--beige);
+    transform: scale(1.05);
+  }
+  #loginModal {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+  }
+  #loginModal.active {
+    display: flex;
+  }
+  #loginModal .modal-content {
+    background: var(--white);
+    padding: 2rem;
+    border-radius: 8px;
+    max-width: 350px;
+    width: 90%;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  }
+  #loginModal h2 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: var(--brown-dark);
+    text-align: center;
+  }
+  #loginModal label {
+    display: block;
+    margin-top: 1rem;
+    color: var(--brown-dark);
+  }
+  #loginModal input {
+    width: 100%;
+    padding: 0.6rem;
+    margin-top: 0.3rem;
+    border-radius: 6px;
+    border: 1px solid var(--brown-light);
+  }
+  #loginModal button {
+    margin-top: 1.5rem;
+    width: 100%;
+    background-color: var(--brown-dark);
+    color: var(--white);
+    border: none;
+    padding: 0.8rem;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  #loginModal button:hover {
+    background-color: var(--brown-light);
+  }
+  #downloadLink {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: var(--beige);
+    border-radius: 8px;
+    border: 1px solid var(--brown-light);
+    display: none;
+    font-weight: 600;
+  }
+  nav ul li a,
+  .category-card,
+  .btn-buy {
+    transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
+  }
+  @media (max-width: 768px) {
+    .product-featured {
+      flex-direction: column;
+      align-items: center;
+    }
+    .product-info {
+      width: 100%;
+      margin-top: 1rem;
+    }
+    section.categories {
+      width: 100%;
+      max-width: 100%;
+      overflow-x: hidden;
+    }
+    .categories-list {
+      flex-direction: column;
+      gap: 1rem;
+    }
+    nav ul {
+      justify-content: flex-start;
+      gap: 1rem;
+      overflow-x: auto;
+      padding: 0.5rem 1rem;
+      scrollbar-width: thin;
+      scrollbar-color: var(--brown-light) transparent;
+    }
+    nav ul::-webkit-scrollbar {
+      height: 6px;
+    }
+    nav ul::-webkit-scrollbar-thumb {
+      background-color: var(--brown-light);
+      border-radius: 3px;
+    }
+  }
+  /* المسافة بين الأقسام والتمرير السلس */
+  section {
+    scroll-margin-top: 70px;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Summary Library</div>
+  <ul>
+    <li><a href="#popular">ملخصات لأشهر الكتب<br>Popular Summaries</a></li>
+    <li><a href="#all">الكل<br>All Summaries</a></li>
+    <li><a href="#about">عنّا<br>About Us</a></li>
+    <li><a href="#return">سياسة الاسترجاع<br>Return Policy</a></li>
+    <li><a href="#contact">تواصل معنا<br>Contact</a></li>
+    <li><a href="#" id="loginBtn">تسجيل دخول<br>Login</a></li>
+  </ul>
+</nav>
+
+<main>
+  <section class="product-featured" aria-label="المنتج الأول - Coming Soon Product">
+    <div class="product-image">
+      <img src="images/img.png" alt="صورة منتج ملخص كتاب قريباً" />
+    </div>
+    <div class="product-info">
+      <h2>ملخص كتاب العادات الذرية - قريباً<br>Atomic Habits eBook Summary - Coming Soon</h2>
+      <div class="coming-soon">🔜 متوفر قريبًا / Coming Soon</div>
+      <p>هذا المنتج هو ملخص كتاب إلكتروني قيد العمل وسيتوفر قريبًا للتحميل المباشر بعد الشراء.</p>
+      <div class="stars" aria-label="تقييم المنتج: 5 نجوم">
+        <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+      </div>
+      <button class="btn-buy" disabled title="سيكون متاحًا قريبًا">اشتري الآن</button>
+    </div>
+  </section>
+
+  <section id="popular" class="categories" aria-label="ملخصات لأشهر الكتب">
+    <h3>ملخصات لأشهر الكتب<br>Popular Summaries</h3>
+    <div class="categories-list">
+      <div class="category-card" tabindex="0">قائمة ملخصات لأشهر الكتب</div>
+    </div>
+  </section>
+
+  <section id="all" class="categories" aria-label="جميع الملخصات">
+    <h3>الكل<br>All Summaries</h3>
+    <div class="categories-list">
+      <div class="category-card" tabindex="0">قائمة جميع الملخصات</div>
+    </div>
+  </section>
+
+  <section id="about" style="margin-top:3rem; background: var(--white); padding:1.5rem; border-radius:8px;">
+    <h3>عنّا<br>About Us</h3>
+    <p>مرحباً بكم في Summary Library - مكتبتكم الرقمية لملخصات الكتب الإلكترونية. هدفنا هو تسهيل الوصول إلى محتوى الكتب وتقديم ملخصات مفيدة ومركزة تساعد القراء المبتدئين والمهتمين بتطوير الذات على اكتساب المعرفة بسرعة وفعالية.</p>
+  </section>
+
+  <section id="return" style="margin-top:3rem; background: var(--white); padding:1.5rem; border-radius:8px;">
+    <h3>سياسة الاسترجاع<br>Return Policy</h3>
+    <p>جميع المبيعات نهائية ولا تقبل الاسترجاع لأن المنتج إلكتروني ويتم تسليمه فوراً. نرجو التأكد من المنتج قبل إتمام الشراء.</p>
+  </section>
+
+  <section id="contact" style="margin-top:3rem; background: var(--white); padding:1.5rem; border-radius:8px;">
+    <h3>تواصل معنا<br>Contact</h3>
+    <p>لأي استفسار أو دعم، تواصل معنا عبر واتساب: <a href="https://wa.me/554369884" target="_blank" rel="noopener">554369884</a></p>
+  </section>
+</main>
+
+<div id="loginModal" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+  <div class="modal-content">
+    <h2 id="loginTitle">تسجيل دخول / Login</h2>
+    <form id="loginForm" autocomplete="off">
+      <label for="email">البريد الإلكتروني / Email</label>
+      <input type="email" id="email" name="email" required />
+      <label for="password">كلمة المرور / Password</label>
+      <input type="password" id="password" name="password" required minlength="6" />
+      <button type="submit">دخول / Login</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  const loginBtn = document.getElementById('loginBtn');
+  const loginModal = document.getElementById('loginModal');
+  const loginForm = document.getElementById('loginForm');
+
+  loginBtn.addEventListener('click', e => {
+    e.preventDefault();
+    loginModal.classList.add('active');
+  });
+
+  loginModal.addEventListener('click', e => {
+    if (e.target === loginModal) {
+      loginModal.classList.remove('active');
+    }
+  });
+
+  loginForm.addEventListener('submit', e => {
+    e.preventDefault();
+    alert('تم تسجيل الدخول بنجاح!');
+    loginModal.classList.remove('active');
+  });
+
+  const buyBtn = document.querySelector('.btn-buy[disabled]');
+  buyBtn.addEventListener('click', () => {
+    alert('المنتج غير متوفر حالياً.');
+  });
+
+  // ظهور العناصر مع التمرير (Scroll animation)
+  function onScroll() {
+    const elements = document.querySelectorAll('.product-featured, section.categories');
+    elements.forEach(el => {
+      const rect = el.getBoundingClientRect();
+      if (rect.top < window.innerHeight - 100) {
+        el.classList.add('visible');
+      }
+    });
+  }
+  window.addEventListener('scroll', onScroll);
+  window.addEventListener('load', onScroll);
+</script>
+
+</body>
+</html>
